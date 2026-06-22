@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeNotes</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<style>
+  :root {
+    --bg:       #0e0e0e;
+    --surface:  #171717;
+    --surface2: #1f1f1f;
+    --border:   #2a2a2a;
+    --accent:   #c8a96e;
+    --accent2:  #8b6f47;
+    --text:     #e8e8e8;
+    --muted:    #666;
+    --danger:   #c0392b;
+    --radius:   10px;
+    --font:     'Inter', system-ui, sans-serif;
+    --mono:     'JetBrains Mono', monospace;
+  }
+  .light {
+    --bg:       #f5f5f0;
+    --surface:  #ffffff;
+    --surface2: #efefea;
+    --border:   #ddd;
+    --text:     #111;
+    --muted:    #888;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; transition: background .2s, color .2s; }
+
+  /* SETUP */
+  #setup-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; gap: 20px; }
+  #setup-screen h1 { font-size: 2rem; color: var(--accent); letter-spacing: -1px; }
+  #setup-screen p { color: var(--muted); font-size: .9rem; text-align: center; max-width: 360px; }
+  .setup-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 14px; }
+  .setup-box label { font-size: .8rem; color: var(--muted); margin-bottom: 2px; display: block; }
+  .setup-box input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 6px; font-size: .85rem; font-family: var(--mono); }
+  .setup-box input:focus { outline: none; border-color: var(--accent); }
+
+  /* TOPBAR */
+  #topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 52px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  #topbar .logo { font-size: 1rem; font-weight: 700; color: var(--accent); letter-spacing: -.5px; }
+  #topbar .actions { display: flex; gap: 10px; align-items: center; }
+  .search-wrap { position: relative; display: flex; align-items: center; }
+  .search-wrap input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 12px 7px 32px; border-radius: 20px; font-size: .83rem; width: 180px; transition: width .2s; }
+  .search-wrap input:focus { outline: none; border-color: var(--accent); width: 240px; }
+  .search-wrap svg { position: absolute; left: 10px; width: 14px; height: 14px; color: var(--muted); }
+  .icon-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: .8rem; display: flex; align-items: center; gap: 5px; transition: border-color .15s; }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn svg { width: 15px; height: 15px; }
+
+  /* LAYOUT */
+  #app { display: flex; min-height: calc(100vh - 52px); }
+
+  /* SIDEBAR */
+  #sidebar { width: 220px; min-width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+  .sidebar-head { padding: 14px 14px 8px; display: flex; justify-content: space-between; align-items: center; }
+  .sidebar-head span { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .sidebar-add { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 1.3rem; line-height: 1; }
+  .sidebar-add:hover { opacity: .7; }
+  .channel-item { display: flex; align-items: center; gap: 8px; padding: 9px 14px; cursor: pointer; border-left: 3px solid transparent; transition: background .1s; }
+  .channel-item:hover { background: var(--surface2); }
+  .channel-item.active { border-left-color: var(--accent); background: var(--surface2); }
+  .ch-name { font-size: .88rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ch-count { font-size: .72rem; color: var(--muted); background: var(--surface2); padding: 2px 6px; border-radius: 10px; }
+  .active .ch-count { background: var(--accent); color: #111; }
+  .ch-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: .85rem; opacity: 0; }
+  .channel-item:hover .ch-del { opacity: 1; }
+  .ch-del:hover { color: var(--danger); }
+
+  /* MAIN */
+  #main { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+  .main-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .main-header h2 { font-size: 1.2rem; font-weight: 700; }
+  .main-header .count { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+
+  /* CARDS */
+  #videos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+  .video-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; cursor: pointer; transition: border-color .15s, transform .1s; display: flex; flex-direction: column; gap: 10px; }
+  .video-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .video-thumb { width: 100%; height: 120px; border-radius: 6px; background: var(--surface2); display: flex; align-items: center; justify-content: center; color: var(--muted); overflow: hidden; }
+  .video-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+  .video-title { font-size: .9rem; font-weight: 600; line-height: 1.3; }
+  .video-meta { display: flex; justify-content: space-between; align-items: center; }
+  .video-channel { font-size: .75rem; color: var(--accent); }
+  .video-date { font-size: .72rem; color: var(--muted); }
+  .video-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag { font-size: .68rem; padding: 2px 7px; border-radius: 10px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .video-notes-preview { font-size: .78rem; color: var(--muted); line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .card-img-preview { display: flex; gap: 4px; }
+  .card-img-preview img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border); }
+  .card-img-more { width: 40px; height: 40px; border-radius: 4px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: .7rem; color: var(--muted); }
+
+  /* EMPTY */
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; gap: 12px; color: var(--muted); }
+  .empty svg { width: 48px; height: 48px; opacity: .3; }
+  .empty p { font-size: .9rem; }
+
+  /* MODAL */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
+  .modal-head { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--surface); z-index: 1; }
+  .modal-head h3 { font-size: 1rem; font-weight: 700; }
+  .modal-close { background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .field label { font-size: .78rem; color: var(--muted); margin-bottom: 5px; display: block; }
+  .field input, .field textarea, .field select { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 6px; font-size: .88rem; font-family: var(--font); }
+  .field textarea { resize: vertical; }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--accent); }
+  .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* NOTE MODAL */
+  .note-images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .note-img-wrap { position: relative; border-radius: 6px; overflow: hidden; }
+  .note-img-wrap img { width: 100%; height: 100px; object-fit: cover; display: block; cursor: zoom-in; }
+  .note-img-del { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.65); border: none; color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: .75rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .img-upload-area { border: 2px dashed var(--border); border-radius: 6px; padding: 16px; text-align: center; cursor: pointer; color: var(--muted); font-size: .83rem; transition: border-color .15s; display: block; }
+  .img-upload-area:hover { border-color: var(--accent); color: var(--accent); }
+  .img-upload-area input { display: none; }
+  .note-text-area { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 6px; font-size: .88rem; font-family: var(--font); resize: vertical; min-height: 160px; }
+  .note-text-area:focus { outline: none; border-color: var(--accent); }
+  .section-label { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+
+  /* LIGHTBOX */
+  #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.93); z-index: 500; align-items: center; justify-content: center; }
+  #lightbox.open { display: flex; }
+  #lightbox img { max-width: 95vw; max-height: 95vh; border-radius: 8px; }
+  #lightbox-close { position: fixed; top: 16px; right: 20px; background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; }
+
+  /* BUTTONS */
+  .btn { padding: 9px 18px; border-radius: 6px; font-size: .85rem; font-weight: 600; cursor: pointer; border: none; transition: opacity .15s; }
+  .btn:hover { opacity: .85; }
+  .btn-primary { background: var(--accent); color: #111; }
+  .btn-ghost { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 6px 12px; font-size: .78rem; }
+
+  /* TOAST */
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 10px 20px; border-radius: 20px; font-size: .83rem; z-index: 999; opacity: 0; pointer-events: none; transition: opacity .25s; white-space: nowrap; }
+  #toast.show { opacity: 1; }
+
+  /* SETTINGS */
+  .color-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .color-dot { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform .1s; }
+  .color-dot:hover, .color-dot.sel { transform: scale(1.2); border-color: var(--text); }
+  .settings-section { border-bottom: 1px solid var(--border); padding: 16px 0; }
+  .settings-section:last-child { border-bottom: none; }
+  .settings-section h4 { font-size: .78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px; }
+
+  mark { background: var(--accent); color: #111; border-radius: 2px; padding: 0 2px; }
+
+  /* MOBILE */
+  #sidebar-overlay { display: none; position: fixed; inset: 0; top: 52px; background: rgba(0,0,0,.5); z-index: 140; }
+  #sidebar-overlay.open { display: block; }
+
+  @media (max-width: 640px) {
+    #sidebar { display: none; }
+    #sidebar.mob-open { display: flex; position: fixed; left: 0; top: 52px; bottom: 0; z-index: 150; width: 210px; box-shadow: 4px 0 20px rgba(0,0,0,.5); }
+    #mob-menu-btn { display: flex !important; }
+    .search-wrap input { width: 130px; }
+    .search-wrap input:focus { width: 170px; }
+    #videos-grid { grid-template-columns: 1fr; }
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup-screen">
+  <h1>TradeNotes</h1>
+  <p>Firebase bilgilerini gir. Bir kez yapılandır — veriler her cihazında senkronize olur.</p>
+  <div class="setup-box">
+    <div><label>API Key</label><input id="s-apikey" placeholder="AIzaSy..."></div>
+    <div><label>Auth Domain</label><input id="s-authdomain" placeholder="xxx.firebaseapp.com"></div>
+    <div><label>Project ID</label><input id="s-projectid" placeholder="your-project-id"></div>
+    <div><label>App ID</label><input id="s-appid" placeholder="1:xxx:web:xxx"></div>
+    <button class="btn btn-primary" onclick="initFirebase()">Bağlan</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-shell" style="display:none">
+  <div id="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="icon-btn" id="mob-menu-btn" onclick="toggleSidebar()" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="logo">TradeNotes</span>
+    </div>
+    <div class="actions">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search-input" placeholder="Not ara..." oninput="handleSearch(this.value)">
+      </div>
+      <button class="icon-btn" onclick="openAddVideo()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span class="hide-xs">Video</span>
+      </button>
+      <button class="icon-btn" onclick="openSettings()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="sidebar-overlay" onclick="toggleSidebar(false)"></div>
+  <div id="app">
+    <div id="sidebar">
+      <div class="sidebar-head">
+        <span>Bölümler</span>
+        <button class="sidebar-add" onclick="openAddChannel()">+</button>
+      </div>
+      <div id="channel-list"></div>
+    </div>
+    <div id="main">
+      <div class="main-header">
+        <div>
+          <h2 id="main-title">Tüm Videolar</h2>
+          <div class="count" id="main-count"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddVideo()">+ Video Ekle</button>
+      </div>
+      <div id="videos-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()">
+  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<div id="toast"></div>
+
+<!-- CHANNEL MODAL -->
+<div class="modal-bg" id="channel-modal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-head"><h3>Bölüm Ekle</h3><button class="modal-close" onclick="closeModal('channel-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Bölüm Adı (kanal, kişi vb.)</label><input id="ch-name-input" placeholder="Örn: ICT, SMC Trader..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('channel-modal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveChannel()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="modal-bg" id="video-modal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="v-modal-title">Video Ekle</h3><button class="modal-close" onclick="closeModal('video-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Video Başlığı *</label><input id="v-title" placeholder="Video adı..."></div>
+      <div class="field"><label>Bölüm *</label><select id="v-channel"></select></div>
+      <div class="field"><label>YouTube Linki (opsiyonel — thumbnail için)</label><input id="v-url" placeholder="https://youtube.com/watch?v=..."></div>
+      <div class="field"><label>Etiketler (virgülle ayır)</label><input id="v-tags" placeholder="SMT, FVG, Entry..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('video-modal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveVideo()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE MODAL -->
+<div class="modal-bg" id="note-modal">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-head">
+      <h3 id="note-modal-title" style="max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-ghost btn-sm" onclick="editCurrentVideo()">Düzenle</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCurrentVideo()">Sil</button>
+        <button class="modal-close" onclick="closeModal('note-modal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span id="note-channel-display" style="font-size:.78rem;color:var(--accent);font-weight:600"></span>
+        <div id="note-tags-display" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+      </div>
+
+      <div>
+        <div class="section-label" style="margin-bottom:8px">Görseller</div>
+        <div class="note-images-grid" id="note-images-grid"></div>
+        <label class="img-upload-area" style="margin-top:8px" id="img-upload-label">
+          <input type="file" id="img-file-input" accept="image/*" multiple onchange="handleImageUpload(this)">
+          📎 Görsel ekle — galeriden seç, yapıştır (Ctrl+V) veya sürükle
+        </label>
+      </div>
+
+      <div>
+        <div class="section-label" style="margin-bottom:8px">Notlar</div>
+        <textarea class="note-text-area" id="note-text" placeholder="Notlarını buraya yaz..." oninput="autoSaveNote()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settings-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head"><h3>Ayarlar</h3><button class="modal-close" onclick="closeModal('settings-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="settings-section">
+        <h4>Tema</h4>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost btn-sm" onclick="setTheme('dark')">🌑 Koyu</button>
+          <button class="btn btn-ghost btn-sm" onclick="setTheme('light')">☀️ Açık</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h4>Vurgu Rengi</h4>
+        <div class="color-row" id="accent-colors"></div>
+      </div>
+      <div class="settings-section">
+        <h4>Firebase</h4>
+        <button class="btn btn-danger btn-sm" onclick="resetFirebase()">Bağlantıyı Sıfırla</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let db;
+let channels = [];
+let videos = [];
+let activeChannel = null;
+let currentVideoId = null;
+let currentImages = [];
+let noteAutoSaveTimer = null;
+
+const ACCENT_COLORS = [
+  { name:'Gold',   val:'#c8a96e' },
+  { name:'Cyan',   val:'#4ec9b0' },
+  { name:'Violet', val:'#9b7fe8' },
+  { name:'Coral',  val:'#e07b6a' },
+  { name:'Mint',   val:'#6abf82' },
+  { name:'Steel',  val:'#7ba7c7' },
+  { name:'Rose',   val:'#d47fa0' },
+  { name:'Amber',  val:'#e8a835' },
+];
+
+// ─── FIREBASE ────────────────────────────────────────────────────────────────
+function initFirebase() {
+  const cfg = {
+    apiKey:     document.getElementById('s-apikey').value.trim(),
+    authDomain: document.getElementById('s-authdomain').value.trim(),
+    projectId:  document.getElementById('s-projectid').value.trim(),
+    appId:      document.getElementById('s-appid').value.trim(),
+  };
+  if (!cfg.apiKey || !cfg.projectId) { toast('API Key ve Project ID zorunlu'); return; }
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    db = firebase.firestore();
+    localStorage.setItem('tn-firebase', JSON.stringify(cfg));
+    showApp();
+    loadData();
+  } catch(e) { toast('Hata: ' + e.message); }
+}
+
+function autoInitFirebase() {
+  const saved = localStorage.getItem('tn-firebase');
+  if (!saved) return false;
+  try {
+    const cfg = JSON.parse(saved);
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    db = firebase.firestore();
+    return true;
+  } catch(e) { return false; }
+}
+
+function resetFirebase() {
+  localStorage.removeItem('tn-firebase');
+  location.reload();
+}
+
+function showApp() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app-shell').style.display = 'block';
+  applyStoredSettings();
+}
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+async function loadData() {
+  const [chSnap, vSnap] = await Promise.all([
+    db.collection('channels').orderBy('name').get(),
+    db.collection('videos').orderBy('createdAt','desc').get()
+  ]);
+  channels = chSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  videos   = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderSidebar();
+  renderVideos();
+}
+
+// ─── SIDEBAR ─────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const el = document.getElementById('channel-list');
+  let html = `<div class="channel-item ${activeChannel===null?'active':''}" onclick="selectChannel(null)">
+    <span class="ch-name" style="font-weight:600">Tüm Videolar</span>
+    <span class="ch-count">${videos.length}</span>
+  </div>`;
+  for (const ch of channels) {
+    const cnt = videos.filter(v => v.channelId === ch.id).length;
+    html += `<div class="channel-item ${activeChannel===ch.id?'active':''}" onclick="selectChannel('${ch.id}')">
+      <span class="ch-name">${esc(ch.name)}</span>
+      <span class="ch-count">${cnt}</span>
+      <button class="ch-del" onclick="event.stopPropagation();deleteChannel('${ch.id}')">✕</button>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function selectChannel(id) {
+  activeChannel = id;
+  document.getElementById('search-input').value = '';
+  renderSidebar();
+  renderVideos();
+  if (window.innerWidth <= 640) toggleSidebar(false);
+}
+
+function toggleSidebar(force) {
+  const s = document.getElementById('sidebar');
+  const o = document.getElementById('sidebar-overlay');
+  const open = force === false ? false : (force === true ? true : !s.classList.contains('mob-open'));
+  s.classList.toggle('mob-open', open);
+  o.classList.toggle('open', open);
+}
+
+// ─── VIDEOS ──────────────────────────────────────────────────────────────────
+function renderVideos(list) {
+  const filtered = list !== undefined ? list :
+    activeChannel === null ? videos : videos.filter(v => v.channelId === activeChannel);
+  const ch = channels.find(c => c.id === activeChannel);
+  document.getElementById('main-title').textContent = ch ? ch.name : 'Tüm Videolar';
+  document.getElementById('main-count').textContent = `${filtered.length} video`;
+  const grid = document.getElementById('videos-grid');
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 8 6 4-6 4V8z"/></svg>
+      <p>Henüz video eklenmedi</p></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(v => {
+    const channel = channels.find(c => c.id === v.channelId);
+    const thumb = ytThumb(v.url);
+    const tags = (v.tags||[]).slice(0,3).map(t => `<span class="tag">${esc(t)}</span>`).join('');
+    const imgs = (v.images||[]);
+    const imgPreview = imgs.length ? `<div class="card-img-preview">
+      ${imgs.slice(0,3).map(i => `<img src="${i.url}" loading="lazy">`).join('')}
+      ${imgs.length>3?`<div class="card-img-more">+${imgs.length-3}</div>`:''}
+    </div>` : '';
+    const preview = v.notes ? v.notes.substring(0,100) : '';
+    return `<div class="video-card" onclick="openNote('${v.id}')">
+      <div class="video-thumb">
+        ${thumb ? `<img src="${thumb}" alt="" loading="lazy">` : `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 8 6 4-6 4V8z"/><rect x="2" y="2" width="20" height="20" rx="3"/></svg>`}
+      </div>
+      <div class="video-title">${esc(v.title)}</div>
+      <div class="video-meta">
+        <span class="video-channel">${esc(channel?.name||'—')}</span>
+        <span class="video-date">${fmtDate(v.createdAt)}</span>
+      </div>
+      ${tags?`<div class="video-tags">${tags}</div>`:''}
+      ${imgPreview}
+      ${preview?`<div class="video-notes-preview">${esc(preview)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ─── CHANNEL CRUD ─────────────────────────────────────────────────────────────
+function openAddChannel() {
+  document.getElementById('ch-name-input').value = '';
+  openModal('channel-modal');
+  setTimeout(() => document.getElementById('ch-name-input').focus(), 100);
+}
+
+async function saveChannel() {
+  const name = document.getElementById('ch-name-input').value.trim();
+  if (!name) { toast('Bölüm adı gir'); return; }
+  const ref = await db.collection('channels').add({ name, createdAt: new Date() });
+  channels.push({ id: ref.id, name });
+  channels.sort((a,b) => a.name.localeCompare(b.name));
+  closeModal('channel-modal');
+  renderSidebar();
+  toast('Bölüm eklendi');
+}
+
+async function deleteChannel(id) {
+  if (!confirm('Bu bölümü sil?')) return;
+  await db.collection('channels').doc(id).delete();
+  channels = channels.filter(c => c.id !== id);
+  if (activeChannel === id) activeChannel = null;
+  renderSidebar();
+  renderVideos();
+  toast('Bölüm silindi');
+}
+
+// ─── VIDEO CRUD ───────────────────────────────────────────────────────────────
+function openAddVideo(videoId) {
+  const v = videoId ? videos.find(x => x.id === videoId) : null;
+  document.getElementById('v-modal-title').textContent = v ? 'Videoyu Düzenle' : 'Video Ekle';
+  document.getElementById('v-title').value = v?.title || '';
+  document.getElementById('v-url').value = v?.url || '';
+  document.getElementById('v-tags').value = (v?.tags||[]).join(', ');
+  const sel = document.getElementById('v-channel');
+  sel.innerHTML = channels.length
+    ? channels.map(c => `<option value="${c.id}" ${v?.channelId===c.id?'selected':''}>${esc(c.name)}</option>`).join('')
+    : '<option value="">Önce bölüm ekle</option>';
+  sel.dataset.editId = videoId || '';
+  openModal('video-modal');
+  setTimeout(() => document.getElementById('v-title').focus(), 100);
+}
+
+async function saveVideo() {
+  const title = document.getElementById('v-title').value.trim();
+  const channelId = document.getElementById('v-channel').value;
+  const url = document.getElementById('v-url').value.trim();
+  const tags = document.getElementById('v-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const editId = document.getElementById('v-channel').dataset.editId;
+  if (!title) { toast('Video başlığı gir'); return; }
+  if (!channelId) { toast('Bölüm seç'); return; }
+  const data = { title, channelId, url, tags, updatedAt: new Date() };
+  if (editId) {
+    await db.collection('videos').doc(editId).update(data);
+    const idx = videos.findIndex(v => v.id === editId);
+    if (idx > -1) videos[idx] = { ...videos[idx], ...data };
+  } else {
+    data.createdAt = new Date();
+    data.notes = '';
+    data.images = [];
+    const ref = await db.collection('videos').add(data);
+    videos.unshift({ id: ref.id, ...data });
+  }
+  closeModal('video-modal');
+  renderSidebar();
+  renderVideos();
+  toast(editId ? 'Video güncellendi' : 'Video eklendi');
+}
+
+// ─── NOTE DETAIL ──────────────────────────────────────────────────────────────
+function openNote(id) {
+  const v = videos.find(x => x.id === id);
+  if (!v) return;
+  currentVideoId = id;
+  currentImages = (v.images||[]).map(i => ({...i}));
+  document.getElementById('note-modal-title').textContent = v.title;
+  document.getElementById('note-channel-display').textContent = channels.find(c=>c.id===v.channelId)?.name || '';
+  document.getElementById('note-tags-display').innerHTML = (v.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+  document.getElementById('note-text').value = v.notes || '';
+  renderNoteImages();
+  openModal('note-modal');
+}
+
+function renderNoteImages() {
+  document.getElementById('note-images-grid').innerHTML = currentImages.map((img,i) => `
+    <div class="note-img-wrap">
+      <img src="${img.url}" onclick="openLightbox('${img.url}')" loading="lazy">
+      <button class="note-img-del" onclick="removeImage(${i})">✕</button>
+    </div>`).join('');
+}
+
+async function removeImage(idx) {
+  currentImages.splice(idx, 1);
+  renderNoteImages();
+  await persistNote();
+}
+
+// Görsel yükleme — base64
+async function handleImageUpload(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  toast('Ekleniyor...');
+  for (const file of files) {
+    await readAndAddImage(file);
+  }
+  input.value = '';
+  renderNoteImages();
+  await persistNote();
+  toast('Görsel eklendi');
+}
+
+function readAndAddImage(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // resize if too large
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX/w); w = MAX; }
+          else { w = Math.round(w * MAX/h); h = MAX; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const url = canvas.toDataURL('image/jpeg', 0.75);
+        currentImages.push({ url });
+        resolve();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// Ctrl+V paste
+document.addEventListener('paste', async (e) => {
+  if (!document.getElementById('note-modal').classList.contains('open')) return;
+  const items = Array.from(e.clipboardData.items);
+  const imageItems = items.filter(i => i.type.startsWith('image/'));
+  if (!imageItems.length) return;
+  toast('Yapıştırılıyor...');
+  for (const item of imageItems) {
+    await readAndAddImage(item.getAsFile());
+  }
+  renderNoteImages();
+  await persistNote();
+  toast('Görsel eklendi');
+});
+
+// Drag & drop
+const uploadLabel = document.getElementById('img-upload-label');
+uploadLabel?.addEventListener('dragover', e => { e.preventDefault(); uploadLabel.style.borderColor = 'var(--accent)'; });
+uploadLabel?.addEventListener('dragleave', () => { uploadLabel.style.borderColor = 'var(--border)'; });
+uploadLabel?.addEventListener('drop', async e => {
+  e.preventDefault();
+  uploadLabel.style.borderColor = 'var(--border)';
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+  for (const f of files) await readAndAddImage(f);
+  if (files.length) { renderNoteImages(); await persistNote(); toast('Görsel eklendi'); }
+});
+
+// Auto save
+function autoSaveNote() {
+  clearTimeout(noteAutoSaveTimer);
+  noteAutoSaveTimer = setTimeout(persistNote, 1200);
+}
+
+async function persistNote() {
+  if (!currentVideoId) return;
+  const notes = document.getElementById('note-text').value;
+  const images = currentImages.map(i => ({ url: i.url }));
+  try {
+    await db.collection('videos').doc(currentVideoId).update({ notes, images });
+    const v = videos.find(x => x.id === currentVideoId);
+    if (v) { v.notes = notes; v.images = images; }
+  } catch(e) { toast('Kayıt hatası: ' + e.message); }
+}
+
+function editCurrentVideo() {
+  closeModal('note-modal');
+  openAddVideo(currentVideoId);
+}
+
+async function deleteCurrentVideo() {
+  if (!confirm('Bu videoyu ve tüm notlarını sil?')) return;
+  await db.collection('videos').doc(currentVideoId).delete();
+  videos = videos.filter(x => x.id !== currentVideoId);
+  closeModal('note-modal');
+  renderSidebar();
+  renderVideos();
+  toast('Video silindi');
+}
+
+// ─── SEARCH ──────────────────────────────────────────────────────────────────
+function handleSearch(query) {
+  query = query.trim().toLowerCase();
+  if (!query) { renderVideos(); return; }
+  const results = videos.filter(v =>
+    v.title.toLowerCase().includes(query) ||
+    (v.notes||'').toLowerCase().includes(query) ||
+    (v.tags||[]).some(t => t.toLowerCase().includes(query)) ||
+    (channels.find(c=>c.id===v.channelId)?.name||'').toLowerCase().includes(query)
+  );
+  document.getElementById('main-title').textContent = `"${query}"`;
+  document.getElementById('main-count').textContent = `${results.length} sonuç`;
+  const grid = document.getElementById('videos-grid');
+  if (!results.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><p>Sonuç bulunamadı</p></div>`;
+    return;
+  }
+  grid.innerHTML = results.map(v => {
+    const channel = channels.find(c=>c.id===v.channelId);
+    const thumb = ytThumb(v.url);
+    const tags = (v.tags||[]).slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+    const snippet = getSnippet(v.notes||'', query);
+    return `<div class="video-card" onclick="openNote('${v.id}')">
+      <div class="video-thumb">${thumb?`<img src="${thumb}" loading="lazy">`:`<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 8 6 4-6 4V8z"/><rect x="2" y="2" width="20" height="20" rx="3"/></svg>`}</div>
+      <div class="video-title">${highlight(esc(v.title),query)}</div>
+      <div class="video-meta"><span class="video-channel">${esc(channel?.name||'—')}</span><span class="video-date">${fmtDate(v.createdAt)}</span></div>
+      ${tags?`<div class="video-tags">${tags}</div>`:''}
+      ${snippet?`<div class="video-notes-preview">${highlight(esc(snippet),query)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function getSnippet(text, query) {
+  const idx = text.toLowerCase().indexOf(query);
+  if (idx === -1) return text.substring(0,100);
+  const start = Math.max(0, idx-30);
+  return (start>0?'…':'')+text.substring(start, idx+query.length+60)+'…';
+}
+
+function highlight(text, query) {
+  if (!query) return text;
+  return text.replace(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<mark>$1</mark>');
+}
+
+// ─── SETTINGS ────────────────────────────────────────────────────────────────
+function openSettings() { buildAccentPicker(); openModal('settings-modal'); }
+
+function setTheme(t) {
+  document.body.classList.toggle('light', t==='light');
+  localStorage.setItem('tn-theme', t);
+}
+
+function setAccent(hex) {
+  document.documentElement.style.setProperty('--accent', hex);
+  document.documentElement.style.setProperty('--accent2', darken(hex));
+  localStorage.setItem('tn-accent', hex);
+  buildAccentPicker();
+}
+
+function darken(hex) {
+  const [r,g,b] = [1,3,5].map(i => parseInt(hex.slice(i,i+2),16));
+  return `rgb(${Math.round(r*.7)},${Math.round(g*.7)},${Math.round(b*.7)})`;
+}
+
+function buildAccentPicker() {
+  const cur = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  document.getElementById('accent-colors').innerHTML = ACCENT_COLORS.map(c =>
+    `<div class="color-dot ${cur===c.val?'sel':''}" style="background:${c.val}" title="${c.name}" onclick="setAccent('${c.val}')"></div>`
+  ).join('');
+}
+
+function applyStoredSettings() {
+  const theme = localStorage.getItem('tn-theme');
+  if (theme) setTheme(theme);
+  const accent = localStorage.getItem('tn-accent');
+  if (accent) { document.documentElement.style.setProperty('--accent', accent); document.documentElement.style.setProperty('--accent2', darken(accent)); }
+}
+
+// ─── LIGHTBOX ────────────────────────────────────────────────────────────────
+function openLightbox(url) { document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').classList.add('open'); }
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+// ─── MODALS ──────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id === 'note-modal') { clearTimeout(noteAutoSaveTimer); persistNote(); renderVideos(); }
+}
+
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if (e.target === bg) closeModal(bg.id); });
+});
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function ytThumb(url) { if (!url) return null; const m = url.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/); return m?`https://img.youtube.com/vi/${m[1]}/mqdefault.jpg`:null; }
+function fmtDate(ts) { if (!ts) return ''; const d = ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'}); }
+function toast(msg, dur=2400) { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),dur); }
+
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') { document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id)); closeLightbox(); }
+});
+
+// ─── BOOT ────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  if (autoInitFirebase()) { showApp(); loadData(); }
+});
+</script>
+</body>
+</html>
