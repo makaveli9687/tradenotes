@@ -354,12 +354,24 @@ function showApp() {
 
 // DATA
 async function loadData() {
-  const [chSnap, vSnap] = await Promise.all([
-    db.collection('channels').orderBy('name').get(),
-    db.collection('videos').orderBy('createdAt','desc').get()
-  ]);
-  channels = chSnap.docs.map(d => ({id:d.id,...d.data()}));
-  videos   = vSnap.docs.map(d => ({id:d.id,...d.data()}));
+  try {
+    const [chSnap, vSnap] = await Promise.all([
+      db.collection('channels').orderBy('name').get(),
+      db.collection('videos').orderBy('createdAt','desc').get()
+    ]);
+    channels = chSnap.docs.map(d => ({id:d.id,...d.data()}));
+    videos   = vSnap.docs.map(d => ({id:d.id,...d.data()}));
+  } catch(e) {
+    // orderBy fails if no index, try without
+    try {
+      const [chSnap, vSnap] = await Promise.all([
+        db.collection('channels').get(),
+        db.collection('videos').get()
+      ]);
+      channels = chSnap.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>a.name?.localeCompare(b.name)||0);
+      videos   = vSnap.docs.map(d => ({id:d.id,...d.data()}));
+    } catch(e2) { toast('Veri yüklenemedi: ' + e2.message); }
+  }
   renderChannels();
 }
 
@@ -448,12 +460,14 @@ function openAddChannel() {
 async function saveChannel() {
   const name = document.getElementById('ch-name-input').value.trim();
   if (!name) { toast('Bölüm adı gir'); return; }
-  const ref = await db.collection('channels').add({name, createdAt:new Date()});
-  channels.push({id:ref.id, name});
-  channels.sort((a,b)=>a.name.localeCompare(b.name));
-  closeModal('channel-modal');
-  renderChannels();
-  toast('Bölüm eklendi');
+  try {
+    const ref = await db.collection('channels').add({name, createdAt:new Date()});
+    channels.push({id:ref.id, name});
+    channels.sort((a,b)=>a.name.localeCompare(b.name));
+    closeModal('channel-modal');
+    renderChannels();
+    toast('Bölüm eklendi ✓');
+  } catch(e) { toast('Hata: ' + e.message); }
 }
 
 async function deleteChannel(id) {
