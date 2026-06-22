@@ -409,10 +409,10 @@ function renderChannels() {
       <div class="cc-count">${cnt} video</div>
     </div>`;
   }).join('');
-  html += `<div class="add-channel-card" onclick="openAddChannel()">
+  html += `<button class="add-channel-card" onclick="openAddChannel()">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Bölüm Ekle
-  </div>`;
+  </button>`;
   grid.innerHTML = html;
 }
 
@@ -457,17 +457,22 @@ function openAddChannel() {
   setTimeout(()=>document.getElementById('ch-name-input').focus(),100);
 }
 
-async function saveChannel() {
+function saveChannel() {
   const name = document.getElementById('ch-name-input').value.trim();
   if (!name) { toast('Bölüm adı gir'); return; }
-  try {
-    const ref = await db.collection('channels').add({name, createdAt:new Date()});
-    channels.push({id:ref.id, name});
-    channels.sort((a,b)=>a.name.localeCompare(b.name));
-    closeModal('channel-modal');
-    renderChannels();
-    toast('Bölüm eklendi ✓');
-  } catch(e) { toast('Hata: ' + e.message); }
+  if (!db) { toast('Firebase bağlı değil!'); return; }
+  toast('Kaydediliyor...');
+  db.collection('channels').add({name: name, createdAt: new Date()})
+    .then(function(ref) {
+      channels.push({id: ref.id, name: name});
+      channels.sort(function(a,b){ return a.name.localeCompare(b.name); });
+      closeModal('channel-modal');
+      renderChannels();
+      toast('Bölüm eklendi ✓');
+    })
+    .catch(function(e) {
+      toast('HATA: ' + e.message);
+    });
 }
 
 async function deleteChannel(id) {
