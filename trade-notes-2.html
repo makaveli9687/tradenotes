@@ -9,7 +9,7 @@
 <style>
 :root {
   --bg:#0e0e0e; --surface:#171717; --surface2:#1f1f1f; --border:#2a2a2a;
-  --accent:#c8a96e; --text:#e8e8e8; --muted:#666; --danger:#c0392b; --radius:10px;
+  --accent:#c8a96e; --text:#e8e8e8; --muted:#555; --danger:#c0392b; --radius:12px;
 }
 .light { --bg:#f5f5f0; --surface:#fff; --surface2:#efefea; --border:#ddd; --text:#111; --muted:#999; }
 * { box-sizing:border-box; margin:0; padding:0; }
@@ -21,89 +21,128 @@ body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif
 #setup p { color:var(--muted); font-size:.85rem; text-align:center; }
 .setup-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; width:100%; max-width:400px; display:flex; flex-direction:column; gap:12px; }
 .setup-box label { font-size:.75rem; color:var(--muted); display:block; margin-bottom:3px; }
-.setup-box input { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:9px 12px; border-radius:6px; font-size:.82rem; font-family:monospace; }
+.setup-box input { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:9px 12px; border-radius:8px; font-size:.82rem; font-family:monospace; }
 
 /* TOPBAR */
 #topbar { display:flex; align-items:center; padding:0 14px; height:50px; background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; gap:10px; }
-.logo { font-size:.95rem; font-weight:700; color:var(--accent); flex-shrink:0; }
-#back-btn { display:none; background:none; border:none; color:var(--accent); cursor:pointer; font-size:.82rem; align-items:center; gap:4px; flex-shrink:0; }
+#back-btn { display:none; background:none; border:none; color:var(--accent); cursor:pointer; font-size:.82rem; align-items:center; gap:4px; flex-shrink:0; white-space:nowrap; }
 #back-btn.show { display:flex; }
+.logo { font-size:.95rem; font-weight:700; color:var(--accent); flex-shrink:0; }
 #search-wrap { flex:1; position:relative; display:none; min-width:0; }
 #search-wrap.show { display:block; }
 #search-input { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:6px 12px 6px 30px; border-radius:20px; font-size:.82rem; }
 #search-wrap svg { position:absolute; left:9px; top:50%; transform:translateY(-50%); width:13px; height:13px; color:var(--muted); pointer-events:none; }
 .top-actions { display:flex; gap:8px; margin-left:auto; flex-shrink:0; }
-.tbtn { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:.78rem; display:flex; align-items:center; gap:4px; }
+.tbtn { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:5px 10px; border-radius:8px; cursor:pointer; font-size:.78rem; display:flex; align-items:center; gap:4px; white-space:nowrap; }
 .tbtn:hover { border-color:var(--accent); color:var(--accent); }
-#add-video-btn { display:none; }
-#add-video-btn.show { display:flex; }
+#add-note-btn { display:none; }
+#add-note-btn.show { display:flex; }
 
 /* CONTENT */
 #content { padding:18px 14px; }
 
 /* CHANNELS */
 #ch-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:14px; }
-.ch-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 14px; cursor:pointer; position:relative; transition:border-color .15s; }
-.ch-card:hover { border-color:var(--accent); }
-.ch-card .name { font-size:.95rem; font-weight:700; margin-bottom:4px; }
-.ch-card .cnt { font-size:.72rem; color:var(--muted); }
-.ch-del { position:absolute; top:8px; right:8px; background:none; border:none; color:var(--muted); cursor:pointer; font-size:.8rem; }
-.ch-del:hover { color:var(--danger); }
-.ch-add { background:transparent; border:2px dashed var(--border); border-radius:var(--radius); padding:18px 14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--muted); font-size:.85rem; width:100%; transition:border-color .15s,color .15s; }
-.ch-add:hover { border-color:var(--accent); color:var(--accent); }
+.ch-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 16px 16px; cursor:pointer; position:relative; transition:border-color .15s; }
+.ch-card:active { border-color:var(--accent); }
+.ch-card .cc-icon { font-size:1.4rem; margin-bottom:8px; }
+.ch-card .cc-name { font-size:.92rem; font-weight:700; margin-bottom:4px; line-height:1.3; }
+.ch-card .cc-cnt { font-size:.72rem; color:var(--muted); }
+.ch-card .cc-del { position:absolute; top:8px; right:8px; background:none; border:none; color:var(--muted); cursor:pointer; font-size:.8rem; padding:4px; }
+.ch-card .cc-del:hover { color:var(--danger); }
+.ch-add { background:transparent; border:2px dashed var(--border); border-radius:var(--radius); padding:20px 16px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; color:var(--muted); font-size:.85rem; width:100%; transition:border-color .15s,color .15s; min-height:100px; }
+.ch-add:active { border-color:var(--accent); color:var(--accent); }
+.ch-add svg { width:20px; height:20px; }
+.section-title { font-size:1.1rem; font-weight:700; }
+.section-sub { font-size:.75rem; color:var(--muted); margin-top:3px; }
 
-/* VIDEOS */
-#v-grid { display:grid; grid-template-columns:1fr; gap:10px; margin-top:14px; }
-.v-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; cursor:pointer; transition:border-color .15s; display:flex; flex-direction:column; gap:8px; }
-.v-card:hover { border-color:var(--accent); }
-.v-thumb { width:100%; height:100px; border-radius:6px; background:var(--surface2); overflow:hidden; display:flex; align-items:center; justify-content:center; }
-.v-thumb img { width:100%; height:100%; object-fit:cover; }
-.v-title { font-size:.88rem; font-weight:600; }
-.v-meta { display:flex; justify-content:space-between; }
-.v-ch { font-size:.72rem; color:var(--accent); }
-.v-date { font-size:.72rem; color:var(--muted); }
-.tags { display:flex; flex-wrap:wrap; gap:4px; }
-.tag { font-size:.65rem; padding:2px 7px; border-radius:10px; background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
-.v-preview { font-size:.76rem; color:var(--muted); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+/* NOTES LIST */
+#n-list { display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.n-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; cursor:pointer; transition:border-color .15s; }
+.n-card:active { border-color:var(--accent); }
+.n-card.type-yt .nc-header { border-left:3px solid var(--accent); }
+.n-card.type-personal .nc-header { border-left:3px solid #4ec9b0; }
+.n-card.type-image .nc-header { border-left:3px solid #9b7fe8; }
+.nc-thumb { width:100%; height:140px; overflow:hidden; background:var(--surface2); }
+.nc-thumb img { width:100%; height:100%; object-fit:cover; }
+.nc-header { padding:12px 14px; display:flex; flex-direction:column; gap:4px; }
+.nc-type { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); }
+.nc-title { font-size:.9rem; font-weight:700; line-height:1.3; }
+.nc-meta { display:flex; justify-content:space-between; align-items:center; }
+.nc-ch { font-size:.72rem; color:var(--accent); }
+.nc-date { font-size:.72rem; color:var(--muted); }
+.nc-tags { display:flex; flex-wrap:wrap; gap:4px; padding:0 14px 10px; }
+.tag { font-size:.65rem; padding:2px 8px; border-radius:10px; background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
+.nc-preview { font-size:.78rem; color:var(--muted); line-height:1.5; padding:0 14px 12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.nc-imgs-preview { display:flex; gap:4px; padding:0 14px 10px; }
+.nc-imgs-preview img { width:44px; height:44px; object-fit:cover; border-radius:6px; border:1px solid var(--border); }
 
 /* EMPTY */
-.empty { text-align:center; padding:50px 20px; color:var(--muted); font-size:.85rem; }
+.empty { text-align:center; padding:50px 20px; color:var(--muted); font-size:.85rem; display:flex; flex-direction:column; align-items:center; gap:10px; }
+.empty svg { width:40px; height:40px; opacity:.25; }
 
-/* SECTION TITLE */
-.section-title { font-size:1rem; font-weight:700; }
-.section-sub { font-size:.75rem; color:var(--muted); margin-top:2px; }
+/* NOTE TYPE PICKER */
+#type-picker { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:150; align-items:flex-end; justify-content:center; }
+#type-picker.open { display:flex; }
+.tp-box { background:var(--surface); border-radius:16px 16px 0 0; width:100%; max-width:640px; padding:20px 16px 32px; display:flex; flex-direction:column; gap:10px; }
+.tp-title { font-size:.8rem; color:var(--muted); text-align:center; margin-bottom:4px; }
+.tp-opt { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; cursor:pointer; display:flex; align-items:center; gap:12px; transition:border-color .15s; }
+.tp-opt:active { border-color:var(--accent); }
+.tp-opt-icon { font-size:1.4rem; }
+.tp-opt-text .tp-label { font-size:.9rem; font-weight:600; }
+.tp-opt-text .tp-desc { font-size:.75rem; color:var(--muted); margin-top:2px; }
+.tp-cancel { background:none; border:none; color:var(--muted); font-size:.85rem; cursor:pointer; padding:8px; text-align:center; }
 
 /* MODAL */
-.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.78); z-index:200; align-items:flex-end; justify-content:center; padding:0; }
+.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.78); z-index:200; align-items:flex-end; justify-content:center; }
 .modal-bg.open { display:flex; }
 .modal { background:var(--surface); border-radius:16px 16px 0 0; width:100%; max-width:640px; max-height:92vh; overflow-y:auto; border-top:1px solid var(--border); }
-.mhead { padding:16px 18px 12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); }
+.mhead { padding:14px 16px 12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); z-index:1; }
 .mhead h3 { font-size:.92rem; font-weight:700; }
 .mclose { background:none; border:none; color:var(--muted); font-size:1.4rem; cursor:pointer; line-height:1; }
-.mbody { padding:16px 18px; display:flex; flex-direction:column; gap:14px; }
-.mfooter { padding:12px 18px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end; }
-.field label { font-size:.75rem; color:var(--muted); display:block; margin-bottom:4px; }
-.field input,.field textarea,.field select { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:9px 12px; border-radius:6px; font-size:.86rem; font-family:system-ui,sans-serif; }
-.field textarea { resize:vertical; min-height:140px; }
-.field input:focus,.field textarea:focus,.field select:focus { outline:none; border-color:var(--accent); }
+.mbody { padding:14px 16px; display:flex; flex-direction:column; gap:12px; }
+.mfooter { padding:10px 16px 16px; display:flex; gap:8px; justify-content:flex-end; }
+.field label { font-size:.72rem; color:var(--muted); display:block; margin-bottom:4px; }
+.field input,.field select { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:9px 12px; border-radius:8px; font-size:.86rem; font-family:system-ui,sans-serif; }
+.field input:focus,.field select:focus { outline:none; border-color:var(--accent); }
+
+/* NOTE DETAIL - NOTION STYLE */
+#note-modal .modal { max-height:100vh; border-radius:0; }
+.note-detail { display:flex; flex-direction:column; min-height:100vh; }
+.nd-topbar { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); z-index:10; gap:8px; }
+.nd-back { background:none; border:none; color:var(--accent); cursor:pointer; font-size:.82rem; display:flex; align-items:center; gap:4px; }
+.nd-actions { display:flex; gap:6px; }
+.nd-body { flex:1; padding:0 0 40px; }
+.nd-cover { width:100%; background:var(--surface2); }
+.nd-cover img { width:100%; max-height:180px; object-fit:cover; display:block; }
+.nd-meta { padding:20px 16px 12px; }
+.nd-type-badge { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent); margin-bottom:8px; }
+.nd-title { font-size:1.4rem; font-weight:800; line-height:1.3; margin-bottom:10px; outline:none; }
+.nd-channel { font-size:.8rem; color:var(--accent); font-weight:600; margin-bottom:8px; }
+.nd-tags { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:4px; }
+.nd-divider { height:1px; background:var(--border); margin:16px; }
+.nd-section { padding:0 16px; margin-bottom:20px; }
+.nd-section-title { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:10px; }
+/* Images grid - Notion style */
+.nd-imgs { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:8px; }
+.nd-img-wrap { position:relative; border-radius:8px; overflow:hidden; }
+.nd-img-wrap img { width:100%; height:120px; object-fit:cover; display:block; cursor:zoom-in; }
+.nd-img-del { position:absolute; top:6px; right:6px; background:rgba(0,0,0,.7); border:none; color:#fff; border-radius:50%; width:22px; height:22px; font-size:.72rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.nd-img-add { border:1.5px dashed var(--border); border-radius:8px; padding:14px; text-align:center; color:var(--muted); font-size:.78rem; cursor:pointer; display:block; transition:border-color .15s; }
+.nd-img-add:hover { border-color:var(--accent); }
+.nd-img-add input { display:none; }
+/* Notes textarea */
+.nd-textarea { width:100%; background:transparent; border:none; color:var(--text); font-size:.92rem; font-family:system-ui,sans-serif; line-height:1.7; resize:none; min-height:200px; padding:0; }
+.nd-textarea:focus { outline:none; }
+.nd-textarea::placeholder { color:var(--muted); }
 
 /* BUTTONS */
-.btn { padding:8px 16px; border-radius:8px; font-size:.84rem; font-weight:600; cursor:pointer; border:none; }
+.btn { padding:8px 16px; border-radius:8px; font-size:.83rem; font-weight:600; cursor:pointer; border:none; }
 .btn-primary { background:var(--accent); color:#111; }
 .btn-ghost { background:var(--surface2); border:1px solid var(--border); color:var(--text); }
 .btn-danger { background:var(--danger); color:#fff; }
-.btn-sm { padding:5px 11px; font-size:.76rem; }
+.btn-sm { padding:5px 11px; font-size:.75rem; }
 .btn:active { opacity:.8; }
-
-/* IMAGES */
-.imgs-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
-.img-wrap { position:relative; border-radius:6px; overflow:hidden; }
-.img-wrap img { width:100%; height:80px; object-fit:cover; display:block; cursor:zoom-in; }
-.img-del { position:absolute; top:3px; right:3px; background:rgba(0,0,0,.65); border:none; color:#fff; border-radius:50%; width:20px; height:20px; font-size:.7rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-.img-add { border:2px dashed var(--border); border-radius:6px; padding:12px; text-align:center; color:var(--muted); font-size:.78rem; cursor:pointer; display:block; }
-.img-add input { display:none; }
-.img-add:hover { border-color:var(--accent); }
-.slabel { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); }
 
 /* LIGHTBOX */
 #lb { display:none; position:fixed; inset:0; background:rgba(0,0,0,.93); z-index:500; align-items:center; justify-content:center; }
@@ -112,10 +151,10 @@ body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif
 #lb-close { position:fixed; top:14px; right:16px; background:none; border:none; color:#fff; font-size:1.8rem; cursor:pointer; }
 
 /* TOAST */
-#toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--surface); border:1px solid var(--accent); color:var(--text); padding:8px 18px; border-radius:20px; font-size:.8rem; z-index:999; opacity:0; pointer-events:none; transition:opacity .2s; white-space:nowrap; }
+#toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--surface); border:1px solid var(--accent); color:var(--text); padding:8px 18px; border-radius:20px; font-size:.8rem; z-index:999; opacity:0; pointer-events:none; transition:opacity .2s; white-space:nowrap; }
 #toast.show { opacity:1; }
 
-/* COLORS */
+/* SETTINGS */
 .color-row { display:flex; flex-wrap:wrap; gap:8px; }
 .cdot { width:26px; height:26px; border-radius:50%; cursor:pointer; border:2px solid transparent; }
 .cdot.sel,.cdot:hover { border-color:var(--text); }
@@ -144,35 +183,32 @@ mark { background:var(--accent); color:#111; border-radius:2px; padding:0 2px; }
 <!-- APP -->
 <div id="app" style="display:none">
   <div id="topbar">
-    <button id="back-btn" onclick="goChannels()">← Bölümler</button>
+    <button id="back-btn" onclick="handleBack()">← Bölümler</button>
     <span class="logo">TradeNotes</span>
     <div id="search-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input id="search-input" placeholder="Ara..." oninput="doSearch(this.value)">
     </div>
     <div class="top-actions">
-      <button class="tbtn" id="add-video-btn" onclick="openVideoModal()">+ Video</button>
+      <button class="tbtn" id="add-note-btn" onclick="openTypePicker()">+ Not Ekle</button>
       <button class="tbtn" onclick="openSettings()">⚙</button>
     </div>
   </div>
 
   <div id="content">
-    <!-- CHANNELS VIEW -->
+    <!-- CHANNELS -->
     <div id="view-ch">
       <div class="section-title">Bölümler</div>
       <div class="section-sub" id="ch-sub"></div>
       <div id="ch-grid"></div>
     </div>
-    <!-- VIDEOS VIEW -->
-    <div id="view-v" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
-          <div class="section-title" id="v-title"></div>
-          <div class="section-sub" id="v-sub"></div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="openVideoModal()">+ Video</button>
+    <!-- NOTES -->
+    <div id="view-n" style="display:none">
+      <div>
+        <div class="section-title" id="n-title"></div>
+        <div class="section-sub" id="n-sub"></div>
       </div>
-      <div id="v-grid"></div>
+      <div id="n-list"></div>
     </div>
   </div>
 </div>
@@ -184,18 +220,73 @@ mark { background:var(--accent); color:#111; border-radius:2px; padding:0 2px; }
 </div>
 <div id="toast"></div>
 
+<!-- TYPE PICKER -->
+<div id="type-picker" onclick="closeTypePicker()">
+  <div class="tp-box" onclick="event.stopPropagation()">
+    <div class="tp-title">Ne eklemek istiyorsun?</div>
+    <div class="tp-opt" onclick="openNoteModal('yt')">
+      <div class="tp-opt-icon">▶️</div>
+      <div class="tp-opt-text">
+        <div class="tp-label">YouTube Videosu</div>
+        <div class="tp-desc">Video notu — thumbnail, etiket, not</div>
+      </div>
+    </div>
+    <div class="tp-opt" onclick="openNoteModal('personal')">
+      <div class="tp-opt-icon">📝</div>
+      <div class="tp-opt-text">
+        <div class="tp-label">Kişisel Not</div>
+        <div class="tp-desc">Serbest not — yazı ve görsel</div>
+      </div>
+    </div>
+    <div class="tp-opt" onclick="openNoteModal('image')">
+      <div class="tp-opt-icon">🖼️</div>
+      <div class="tp-opt-text">
+        <div class="tp-label">Görsel Not</div>
+        <div class="tp-desc">Görseller ön planda, not altında</div>
+      </div>
+    </div>
+    <button class="tp-cancel" onclick="closeTypePicker()">İptal</button>
+  </div>
+</div>
+
+<!-- ADD/EDIT NOTE MODAL -->
+<div class="modal-bg" id="add-modal">
+  <div class="modal">
+    <div class="mhead">
+      <h3 id="am-title">Not Ekle</h3>
+      <button class="mclose" onclick="closeM('add-modal')">✕</button>
+    </div>
+    <div class="mbody">
+      <div class="field"><label>Başlık *</label><input id="am-name" placeholder="Başlık..."></div>
+      <div class="field"><label>Bölüm *</label><select id="am-ch"></select></div>
+      <div id="am-yt-fields">
+        <div class="field" style="margin-top:10px"><label>YouTube Linki (thumbnail için)</label><input id="am-url" placeholder="https://youtube.com/watch?v=..."></div>
+      </div>
+      <div class="field"><label>Etiketler (virgülle ayır)</label><input id="am-tags" placeholder="SMT, FVG, Entry..."></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-ghost" onclick="closeM('add-modal')">İptal</button>
+      <button class="btn btn-primary" id="am-save">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE DETAIL (FULL SCREEN) -->
+<div class="modal-bg" id="note-modal">
+  <div class="modal">
+    <div class="note-detail" id="note-detail-inner"></div>
+  </div>
+</div>
+
 <!-- CHANNEL MODAL -->
 <div class="modal-bg" id="ch-modal">
-  <div class="modal">
+  <div class="modal" style="max-height:50vh">
     <div class="mhead">
       <h3>Bölüm Ekle</h3>
       <button class="mclose" onclick="closeM('ch-modal')">✕</button>
     </div>
     <div class="mbody">
-      <div class="field">
-        <label>Bölüm Adı</label>
-        <input id="ch-input" placeholder="Örn: ICT, SMC Trader...">
-      </div>
+      <div class="field"><label>Bölüm Adı</label><input id="ch-input" placeholder="Örn: ICT, SMC Trader..."></div>
     </div>
     <div class="mfooter">
       <button class="btn btn-ghost" onclick="closeM('ch-modal')">İptal</button>
@@ -204,61 +295,9 @@ mark { background:var(--accent); color:#111; border-radius:2px; padding:0 2px; }
   </div>
 </div>
 
-<!-- VIDEO MODAL -->
-<div class="modal-bg" id="v-modal">
-  <div class="modal">
-    <div class="mhead">
-      <h3 id="vm-title">Video Ekle</h3>
-      <button class="mclose" onclick="closeM('v-modal')">✕</button>
-    </div>
-    <div class="mbody">
-      <div class="field"><label>Video Başlığı *</label><input id="v-name" placeholder="Video adı..."></div>
-      <div class="field"><label>Bölüm *</label><select id="v-ch-sel"></select></div>
-      <div class="field"><label>YouTube Linki (thumbnail için)</label><input id="v-url" placeholder="https://youtube.com/watch?v=..."></div>
-      <div class="field"><label>Etiketler (virgülle ayır)</label><input id="v-tags-in" placeholder="SMT, FVG, Entry..."></div>
-    </div>
-    <div class="mfooter">
-      <button class="btn btn-ghost" onclick="closeM('v-modal')">İptal</button>
-      <button class="btn btn-primary" id="v-save-btn">Kaydet</button>
-    </div>
-  </div>
-</div>
-
-<!-- NOTE MODAL -->
-<div class="modal-bg" id="note-modal">
-  <div class="modal">
-    <div class="mhead">
-      <h3 id="nm-title" style="max-width:65%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</h3>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-ghost btn-sm" id="nm-edit-btn">Düzenle</button>
-        <button class="btn btn-danger btn-sm" id="nm-del-btn">Sil</button>
-        <button class="mclose" onclick="closeM('note-modal')">✕</button>
-      </div>
-    </div>
-    <div class="mbody">
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-        <span id="nm-ch" style="font-size:.75rem;color:var(--accent);font-weight:600"></span>
-        <div id="nm-tags"></div>
-      </div>
-      <div>
-        <div class="slabel" style="margin-bottom:8px">Görseller</div>
-        <div class="imgs-grid" id="nm-imgs"></div>
-        <label class="img-add" style="margin-top:8px">
-          <input type="file" id="img-input" accept="image/*" multiple onchange="addImgs(this)">
-          📎 Görsel ekle
-        </label>
-      </div>
-      <div>
-        <div class="slabel" style="margin-bottom:6px">Notlar</div>
-        <textarea id="nm-text" placeholder="Notlarını buraya yaz..." oninput="schedSave()"></textarea>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- SETTINGS MODAL -->
 <div class="modal-bg" id="s-modal">
-  <div class="modal" style="border-radius:16px 16px 0 0">
+  <div class="modal" style="max-height:60vh">
     <div class="mhead"><h3>Ayarlar</h3><button class="mclose" onclick="closeM('s-modal')">✕</button></div>
     <div class="mbody">
       <div class="ssec">
@@ -283,17 +322,20 @@ mark { background:var(--accent); color:#111; border-radius:2px; padding:0 2px; }
 <script>
 var db = null;
 var channels = [];
-var videos = [];
+var notes = [];
 var activeCh = null;
-var curVid = null;
+var curNote = null;
 var curImgs = [];
 var saveTimer = null;
+var curType = 'yt';
+var editId = null;
+var history = []; // ['channels', 'notes', 'note-detail']
 
-var COLORS = [
-  '#c8a96e','#4ec9b0','#9b7fe8','#e07b6a','#6abf82','#7ba7c7','#d47fa0','#e8a835'
-];
+var COLORS = ['#c8a96e','#4ec9b0','#9b7fe8','#e07b6a','#6abf82','#7ba7c7','#d47fa0','#e8a835'];
+var TYPE_LABELS = { yt:'YouTube Videosu', personal:'Kişisel Not', image:'Görsel Not' };
+var TYPE_COLORS = { yt:'var(--accent)', personal:'#4ec9b0', image:'#9b7fe8' };
 
-// INIT
+// FIREBASE
 function doInit() {
   var cfg = {
     apiKey:     document.getElementById('s1').value.trim(),
@@ -302,20 +344,13 @@ function doInit() {
     appId:      document.getElementById('s4').value.trim()
   };
   var err = document.getElementById('setup-err');
-  if (!cfg.apiKey || !cfg.projectId) {
-    err.textContent = 'API Key ve Project ID zorunlu';
-    err.style.display = 'block';
-    return;
-  }
+  if (!cfg.apiKey || !cfg.projectId) { err.textContent='API Key ve Project ID zorunlu'; err.style.display='block'; return; }
   try {
     if (!firebase.apps.length) firebase.initializeApp(cfg);
     db = firebase.firestore();
     localStorage.setItem('tn-cfg', JSON.stringify(cfg));
     startApp();
-  } catch(e) {
-    err.textContent = 'Hata: ' + e.message;
-    err.style.display = 'block';
-  }
+  } catch(e) { err.textContent='Hata: '+e.message; err.style.display='block'; }
 }
 
 function tryAutoInit() {
@@ -329,10 +364,7 @@ function tryAutoInit() {
   } catch(e) { return false; }
 }
 
-function resetFb() {
-  localStorage.removeItem('tn-cfg');
-  location.reload();
-}
+function resetFb() { localStorage.removeItem('tn-cfg'); location.reload(); }
 
 function startApp() {
   document.getElementById('setup').style.display = 'none';
@@ -347,12 +379,65 @@ function loadAll() {
     channels = [];
     cs.forEach(function(d) { channels.push(Object.assign({id:d.id}, d.data())); });
     channels.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
-    return db.collection('videos').get();
-  }).then(function(vs) {
-    videos = [];
-    vs.forEach(function(d) { videos.push(Object.assign({id:d.id}, d.data())); });
-    renderChannels();
-  }).catch(function(e) { toast('Yükleme hatası: ' + e.message); });
+    return db.collection('notes').get();
+  }).then(function(ns) {
+    notes = [];
+    ns.forEach(function(d) { notes.push(Object.assign({id:d.id}, d.data())); });
+    goChannels();
+  }).catch(function(e) { toast('Yükleme hatası: '+e.message); });
+}
+
+// NAVIGATION
+function pushHistory(page) {
+  history.push(page);
+  window.history.pushState({page:page}, '');
+}
+
+window.addEventListener('popstate', function(e) {
+  if (history.length > 1) {
+    history.pop();
+    var prev = history[history.length-1];
+    if (prev === 'channels') { showChannelsView(); }
+    else if (prev === 'notes') { showNotesView(); }
+  } else {
+    showChannelsView();
+  }
+});
+
+function handleBack() {
+  if (history.length > 1) { window.history.back(); }
+  else { goChannels(); }
+}
+
+function goChannels() {
+  history = ['channels'];
+  window.history.replaceState({page:'channels'}, '');
+  showChannelsView();
+}
+
+function showChannelsView() {
+  activeCh = null;
+  document.getElementById('view-ch').style.display = 'block';
+  document.getElementById('view-n').style.display = 'none';
+  document.getElementById('back-btn').classList.remove('show');
+  document.getElementById('search-wrap').classList.remove('show');
+  document.getElementById('add-note-btn').classList.remove('show');
+  renderChannels();
+}
+
+function goNotes(chId) {
+  activeCh = chId;
+  pushHistory('notes');
+  showNotesView();
+}
+
+function showNotesView() {
+  document.getElementById('view-ch').style.display = 'none';
+  document.getElementById('view-n').style.display = 'block';
+  document.getElementById('back-btn').classList.add('show');
+  document.getElementById('search-wrap').classList.add('show');
+  document.getElementById('add-note-btn').classList.add('show');
+  renderNotes();
 }
 
 // CHANNELS
@@ -360,179 +445,181 @@ function renderChannels() {
   document.getElementById('ch-sub').textContent = channels.length + ' bölüm';
   var html = '';
   channels.forEach(function(ch) {
-    var cnt = videos.filter(function(v){ return v.channelId === ch.id; }).length;
-    html += '<div class="ch-card" onclick="goVideos(\'' + ch.id + '\')">' +
-      '<button class="ch-del" onclick="event.stopPropagation();delChannel(\'' + ch.id + '\')">✕</button>' +
-      '<div class="name">' + esc(ch.name) + '</div>' +
-      '<div class="cnt">' + cnt + ' video</div>' +
+    var cnt = notes.filter(function(n){ return n.channelId===ch.id; }).length;
+    html += '<div class="ch-card" onclick="goNotes(\''+ch.id+'\')">' +
+      '<button class="cc-del" onclick="event.stopPropagation();delChannel(\''+ch.id+'\')">✕</button>' +
+      '<div class="cc-name">'+esc(ch.name)+'</div>' +
+      '<div class="cc-cnt">'+cnt+' not</div>' +
     '</div>';
   });
-  html += '<button class="ch-add" onclick="openChModal()">+ Bölüm Ekle</button>';
+  html += '<button class="ch-add" onclick="openChModal()">' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+    'Bölüm Ekle</button>';
   document.getElementById('ch-grid').innerHTML = html;
 }
 
-function goChannels() {
-  activeCh = null;
-  document.getElementById('view-ch').style.display = 'block';
-  document.getElementById('view-v').style.display = 'none';
-  document.getElementById('back-btn').classList.remove('show');
-  document.getElementById('search-wrap').classList.remove('show');
-  document.getElementById('add-video-btn').classList.remove('show');
-  renderChannels();
-}
-
-function goVideos(chId) {
-  activeCh = chId;
-  document.getElementById('view-ch').style.display = 'none';
-  document.getElementById('view-v').style.display = 'block';
-  document.getElementById('back-btn').classList.add('show');
-  document.getElementById('search-wrap').classList.add('show');
-  document.getElementById('add-video-btn').classList.add('show');
-  renderVideos();
-}
-
-// VIDEOS
-function renderVideos(list) {
-  var ch = channels.find(function(c){ return c.id === activeCh; });
-  var items = list !== undefined ? list : videos.filter(function(v){ return v.channelId === activeCh; });
-  document.getElementById('v-title').textContent = ch ? ch.name : '';
-  document.getElementById('v-sub').textContent = items.length + ' video';
+// NOTES
+function renderNotes(list) {
+  var ch = channels.find(function(c){ return c.id===activeCh; });
+  var items = list !== undefined ? list : notes.filter(function(n){ return n.channelId===activeCh; });
+  items.sort(function(a,b){ return ((b.createdAt&&b.createdAt.seconds)||0) - ((a.createdAt&&a.createdAt.seconds)||0); });
+  document.getElementById('n-title').textContent = ch ? ch.name : '';
+  document.getElementById('n-sub').textContent = items.length + ' not';
   if (!items.length) {
-    document.getElementById('v-grid').innerHTML = '<div class="empty">Henüz video eklenmedi</div>';
+    document.getElementById('n-list').innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Henüz not eklenmedi</p></div>';
     return;
   }
   var html = '';
-  items.forEach(function(v) {
-    var thumb = ytThumb(v.url);
-    var tags = (v.tags||[]).slice(0,3).map(function(t){ return '<span class="tag">'+esc(t)+'</span>'; }).join('');
-    var prev = v.notes ? v.notes.substring(0,100) : '';
-    html += '<div class="v-card" onclick="openNote(\'' + v.id + '\')">' +
-      '<div class="v-thumb">' + (thumb ? '<img src="'+thumb+'" loading="lazy">' : '') + '</div>' +
-      '<div class="v-title">' + esc(v.title) + '</div>' +
-      '<div class="v-meta"><span class="v-ch">' + esc(ch?ch.name:'') + '</span><span class="v-date">' + fmtDate(v.createdAt) + '</span></div>' +
-      (tags ? '<div class="tags">' + tags + '</div>' : '') +
-      (prev ? '<div class="v-preview">' + esc(prev) + '</div>' : '') +
+  items.forEach(function(n) {
+    var thumb = n.type==='yt' ? ytThumb(n.url) : null;
+    var imgs = n.images||[];
+    var typeColor = TYPE_COLORS[n.type]||'var(--accent)';
+    html += '<div class="n-card type-'+n.type+'" onclick="openNoteDetail(\''+n.id+'\')">';
+    if (thumb) html += '<div class="nc-thumb"><img src="'+thumb+'" loading="lazy"></div>';
+    else if (n.type==='image' && imgs.length) html += '<div class="nc-thumb"><img src="'+imgs[0].url+'" loading="lazy"></div>';
+    html += '<div class="nc-header">' +
+      '<div class="nc-type" style="color:'+typeColor+'">'+TYPE_LABELS[n.type]+'</div>' +
+      '<div class="nc-title">'+esc(n.title)+'</div>' +
+      '<div class="nc-meta"><span class="nc-ch">'+esc(ch?ch.name:'')+'</span><span class="nc-date">'+fmtDate(n.createdAt)+'</span></div>' +
     '</div>';
+    var tags = (n.tags||[]).slice(0,4);
+    if (tags.length) html += '<div class="nc-tags">'+tags.map(function(t){ return '<span class="tag">'+esc(t)+'</span>'; }).join('')+'</div>';
+    if (n.notes) html += '<div class="nc-preview">'+esc(n.notes)+'</div>';
+    if (n.type!=='yt' && imgs.length>1) {
+      html += '<div class="nc-imgs-preview">'+imgs.slice(1,4).map(function(i){ return '<img src="'+i.url+'" loading="lazy">'; }).join('')+'</div>';
+    }
+    html += '</div>';
   });
-  document.getElementById('v-grid').innerHTML = html;
+  document.getElementById('n-list').innerHTML = html;
 }
 
-// CHANNEL MODAL
-function openChModal() {
-  document.getElementById('ch-input').value = '';
-  openM('ch-modal');
-  setTimeout(function(){ document.getElementById('ch-input').focus(); }, 300);
+// TYPE PICKER
+function openTypePicker() {
+  document.getElementById('type-picker').classList.add('open');
+}
+function closeTypePicker() {
+  document.getElementById('type-picker').classList.remove('open');
 }
 
-document.getElementById('ch-save-btn').onclick = function() {
-  var name = document.getElementById('ch-input').value.trim();
-  if (!name) { toast('İsim gir'); return; }
-  toast('Kaydediliyor...');
-  db.collection('channels').add({ name: name, createdAt: new Date() })
-    .then(function(ref) {
-      channels.push({ id: ref.id, name: name });
-      channels.sort(function(a,b){ return a.name.localeCompare(b.name); });
-      closeM('ch-modal');
-      renderChannels();
-      toast('Bölüm eklendi ✓');
-    })
-    .catch(function(e) { toast('Hata: ' + e.message); });
-};
-
-function delChannel(id) {
-  if (!confirm('Sil?')) return;
-  db.collection('channels').doc(id).delete().then(function() {
-    channels = channels.filter(function(c){ return c.id !== id; });
-    renderChannels();
-    toast('Silindi');
-  }).catch(function(e){ toast('Hata: '+e.message); });
-}
-
-// VIDEO MODAL
-function openVideoModal(vidId) {
-  var v = vidId ? videos.find(function(x){ return x.id===vidId; }) : null;
-  document.getElementById('vm-title').textContent = v ? 'Düzenle' : 'Video Ekle';
-  document.getElementById('v-name').value = v ? v.title : '';
-  document.getElementById('v-url').value = v ? (v.url||'') : '';
-  document.getElementById('v-tags-in').value = v ? (v.tags||[]).join(', ') : '';
-  var sel = document.getElementById('v-ch-sel');
+// ADD/EDIT MODAL
+function openNoteModal(type, noteId) {
+  closeTypePicker();
+  curType = type || 'yt';
+  editId = noteId || null;
+  var n = noteId ? notes.find(function(x){ return x.id===noteId; }) : null;
+  document.getElementById('am-title').textContent = n ? 'Düzenle' : (TYPE_LABELS[curType]||'Not Ekle')+' Ekle';
+  document.getElementById('am-name').value = n ? (n.title||'') : '';
+  document.getElementById('am-url').value = n ? (n.url||'') : '';
+  document.getElementById('am-tags').value = n ? (n.tags||[]).join(', ') : '';
+  var sel = document.getElementById('am-ch');
   sel.innerHTML = channels.map(function(c){
-    return '<option value="'+c.id+'"'+(( v ? v.channelId : activeCh)===c.id?' selected':'')+'>'+esc(c.name)+'</option>';
+    return '<option value="'+c.id+'"'+((n?n.channelId:activeCh)===c.id?' selected':'')+'>'+esc(c.name)+'</option>';
   }).join('');
-  sel.dataset.eid = vidId || '';
-  openM('v-modal');
-  setTimeout(function(){ document.getElementById('v-name').focus(); }, 300);
+  document.getElementById('am-yt-fields').style.display = curType==='yt' ? 'block' : 'none';
+  openM('add-modal');
+  setTimeout(function(){ document.getElementById('am-name').focus(); }, 300);
 }
 
-document.getElementById('v-save-btn').onclick = function() {
-  var title = document.getElementById('v-name').value.trim();
-  var chId = document.getElementById('v-ch-sel').value;
-  var url = document.getElementById('v-url').value.trim();
-  var tags = document.getElementById('v-tags-in').value.split(',').map(function(t){ return t.trim(); }).filter(Boolean);
-  var eid = document.getElementById('v-ch-sel').dataset.eid;
+document.getElementById('am-save').onclick = function() {
+  var title = document.getElementById('am-name').value.trim();
+  var chId = document.getElementById('am-ch').value;
+  var url = document.getElementById('am-url').value.trim();
+  var tags = document.getElementById('am-tags').value.split(',').map(function(t){ return t.trim(); }).filter(Boolean);
   if (!title) { toast('Başlık gir'); return; }
   if (!chId) { toast('Bölüm seç'); return; }
-  var data = { title:title, channelId:chId, url:url, tags:tags, updatedAt:new Date() };
+  var data = { title:title, channelId:chId, url:url, tags:tags, type:curType, updatedAt:new Date() };
   toast('Kaydediliyor...');
-  if (eid) {
-    db.collection('videos').doc(eid).update(data).then(function() {
-      var idx = videos.findIndex(function(v){ return v.id===eid; });
-      if (idx>-1) videos[idx] = Object.assign(videos[idx], data);
-      closeM('v-modal');
-      renderVideos();
+  if (editId) {
+    db.collection('notes').doc(editId).update(data).then(function() {
+      var idx = notes.findIndex(function(n){ return n.id===editId; });
+      if (idx>-1) notes[idx] = Object.assign(notes[idx], data);
+      closeM('add-modal');
+      renderNotes();
       toast('Güncellendi ✓');
     }).catch(function(e){ toast('Hata: '+e.message); });
   } else {
     data.createdAt = new Date(); data.notes = ''; data.images = [];
-    db.collection('videos').add(data).then(function(ref) {
-      videos.unshift(Object.assign({id:ref.id}, data));
-      closeM('v-modal');
+    db.collection('notes').add(data).then(function(ref) {
+      notes.unshift(Object.assign({id:ref.id}, data));
+      closeM('add-modal');
       renderChannels();
-      renderVideos();
-      toast('Video eklendi ✓');
+      renderNotes();
+      toast('Eklendi ✓');
+      // open detail immediately
+      setTimeout(function(){ openNoteDetail(ref.id); }, 200);
     }).catch(function(e){ toast('Hata: '+e.message); });
   }
 };
 
-// NOTE
-function openNote(id) {
-  var v = videos.find(function(x){ return x.id===id; });
-  if (!v) return;
-  curVid = id;
-  curImgs = (v.images||[]).map(function(i){ return Object.assign({},i); });
-  var ch = channels.find(function(c){ return c.id===v.channelId; });
-  document.getElementById('nm-title').textContent = v.title;
-  document.getElementById('nm-ch').textContent = ch ? ch.name : '';
-  document.getElementById('nm-tags').innerHTML = (v.tags||[]).map(function(t){ return '<span class="tag">'+esc(t)+'</span>'; }).join('');
-  document.getElementById('nm-text').value = v.notes||'';
-  renderNoteImgs();
+// NOTE DETAIL
+function openNoteDetail(id) {
+  var n = notes.find(function(x){ return x.id===id; });
+  if (!n) return;
+  curNote = id;
+  curImgs = (n.images||[]).map(function(i){ return Object.assign({},i); });
+  var ch = channels.find(function(c){ return c.id===n.channelId; });
+  var thumb = n.type==='yt' ? ytThumb(n.url) : null;
+  var typeColor = TYPE_COLORS[n.type]||'var(--accent)';
+
+  var html = '<div class="nd-topbar">' +
+    '<button class="nd-back" onclick="closeNoteDetail()">← Geri</button>' +
+    '<div class="nd-actions">' +
+      '<button class="btn btn-ghost btn-sm" onclick="openNoteModal(\''+n.type+'\',\''+id+'\')">Düzenle</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="deleteNote(\''+id+'\')">Sil</button>' +
+    '</div>' +
+  '</div>' +
+  '<div class="nd-body">';
+
+  if (thumb) html += '<div class="nd-cover"><img src="'+thumb+'"></div>';
+
+  html += '<div class="nd-meta">' +
+    '<div class="nd-type-badge" style="color:'+typeColor+'">'+TYPE_LABELS[n.type]+'</div>' +
+    '<div class="nd-title">'+esc(n.title)+'</div>' +
+    (ch ? '<div class="nd-channel">'+esc(ch.name)+'</div>' : '') +
+    ((n.tags&&n.tags.length) ? '<div class="nd-tags">'+n.tags.map(function(t){ return '<span class="tag">'+esc(t)+'</span>'; }).join('')+'</div>' : '') +
+  '</div>';
+
+  html += '<div class="nd-divider"></div>';
+
+  html += '<div class="nd-section">' +
+    '<div class="nd-section-title">Görseller</div>' +
+    '<div class="nd-imgs" id="nd-imgs-grid"></div>' +
+    '<label class="nd-img-add"><input type="file" id="nd-img-input" accept="image/*" multiple onchange="addNoteImgs(this)">📎 Görsel ekle</label>' +
+  '</div>';
+
+  html += '<div class="nd-section">' +
+    '<div class="nd-section-title">Notlar</div>' +
+    '<textarea class="nd-textarea" id="nd-text" placeholder="Notlarını buraya yaz..." oninput="schedSave()">'+esc(n.notes||'')+'</textarea>' +
+  '</div>';
+
+  html += '</div>';
+
+  document.getElementById('note-detail-inner').innerHTML = html;
+  renderDetailImgs();
   openM('note-modal');
+  pushHistory('note-detail');
 }
 
-document.getElementById('nm-edit-btn').onclick = function() {
-  closeM('note-modal'); openVideoModal(curVid);
-};
-document.getElementById('nm-del-btn').onclick = function() {
-  if (!confirm('Sil?')) return;
-  db.collection('videos').doc(curVid).delete().then(function() {
-    videos = videos.filter(function(x){ return x.id!==curVid; });
-    closeM('note-modal'); renderChannels(); renderVideos();
-    toast('Silindi');
-  }).catch(function(e){ toast('Hata: '+e.message); });
-};
+function closeNoteDetail() {
+  closeM('note-modal');
+  clearTimeout(saveTimer);
+  saveNote();
+  renderNotes();
+}
 
-function renderNoteImgs() {
-  var html = curImgs.map(function(img,i){
-    return '<div class="img-wrap"><img src="'+img.url+'" onclick="openLb(\''+img.url+'\')"><button class="img-del" onclick="removeImg('+i+')">✕</button></div>';
+function renderDetailImgs() {
+  var el = document.getElementById('nd-imgs-grid');
+  if (!el) return;
+  el.innerHTML = curImgs.map(function(img,i){
+    return '<div class="nd-img-wrap"><img src="'+img.url+'" onclick="openLb(\''+img.url+'\')"><button class="nd-img-del" onclick="removeNoteImg('+i+')">✕</button></div>';
   }).join('');
-  document.getElementById('nm-imgs').innerHTML = html;
 }
 
-function removeImg(i) {
-  curImgs.splice(i,1); renderNoteImgs(); saveNote();
+function removeNoteImg(i) {
+  curImgs.splice(i,1); renderDetailImgs(); saveNote();
 }
 
-function addImgs(input) {
+function addNoteImgs(input) {
   var files = Array.from(input.files);
   if (!files.length) return;
   var done = 0;
@@ -540,10 +627,10 @@ function addImgs(input) {
   files.forEach(function(f) {
     readImg(f, function() {
       done++;
-      if (done === files.length) { renderNoteImgs(); saveNote(); toast('Görsel eklendi ✓'); }
+      if (done===files.length) { renderDetailImgs(); saveNote(); toast('Görsel eklendi ✓'); }
     });
   });
-  input.value = '';
+  input.value='';
 }
 
 function readImg(file, cb) {
@@ -551,14 +638,14 @@ function readImg(file, cb) {
   reader.onload = function(e) {
     var img = new Image();
     img.onload = function() {
-      var MAX=1200, w=img.width, h=img.height;
-      if (w>MAX||h>MAX) { if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;} }
+      var MAX=1200,w=img.width,h=img.height;
+      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
       var c=document.createElement('canvas'); c.width=w; c.height=h;
       c.getContext('2d').drawImage(img,0,0,w,h);
-      curImgs.push({ url: c.toDataURL('image/jpeg', 0.75) });
-      if (cb) cb();
+      curImgs.push({url:c.toDataURL('image/jpeg',.75)});
+      if(cb) cb();
     };
-    img.src = e.target.result;
+    img.src=e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -567,52 +654,89 @@ document.addEventListener('paste', function(e) {
   if (!document.getElementById('note-modal').classList.contains('open')) return;
   var items = Array.from(e.clipboardData.items).filter(function(i){ return i.type.startsWith('image/'); });
   if (!items.length) return;
-  toast('Yapıştırılıyor...');
-  var done = 0;
+  var done=0;
   items.forEach(function(item) {
-    readImg(item.getAsFile(), function() {
+    readImg(item.getAsFile(), function(){
       done++;
-      if (done===items.length) { renderNoteImgs(); saveNote(); toast('Görsel eklendi ✓'); }
+      if(done===items.length){ renderDetailImgs(); saveNote(); toast('Görsel eklendi ✓'); }
     });
   });
 });
 
-function schedSave() {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveNote, 1200);
-}
+function schedSave() { clearTimeout(saveTimer); saveTimer=setTimeout(saveNote,1200); }
 
 function saveNote() {
-  if (!curVid) return;
-  var notes = document.getElementById('nm-text').value;
+  if (!curNote) return;
+  var el = document.getElementById('nd-text');
+  var notes_val = el ? el.value : '';
   var images = curImgs.map(function(i){ return {url:i.url}; });
-  db.collection('videos').doc(curVid).update({notes:notes, images:images}).then(function() {
-    var v = videos.find(function(x){ return x.id===curVid; });
-    if (v) { v.notes=notes; v.images=images; }
+  db.collection('notes').doc(curNote).update({notes:notes_val, images:images}).then(function(){
+    var n=notes.find(function(x){ return x.id===curNote; });
+    if(n){ n.notes=notes_val; n.images=images; }
   }).catch(function(e){ toast('Kayıt hatası: '+e.message); });
+}
+
+function deleteNote(id) {
+  if (!confirm('Sil?')) return;
+  db.collection('notes').doc(id).delete().then(function(){
+    notes = notes.filter(function(x){ return x.id!==id; });
+    closeM('note-modal');
+    renderChannels();
+    renderNotes();
+    toast('Silindi');
+  }).catch(function(e){ toast('Hata: '+e.message); });
+}
+
+// CHANNEL CRUD
+function openChModal() {
+  document.getElementById('ch-input').value='';
+  openM('ch-modal');
+  setTimeout(function(){ document.getElementById('ch-input').focus(); },300);
+}
+
+document.getElementById('ch-save-btn').onclick = function() {
+  var name = document.getElementById('ch-input').value.trim();
+  if (!name) { toast('İsim gir'); return; }
+  toast('Kaydediliyor...');
+  db.collection('channels').add({name:name, createdAt:new Date()}).then(function(ref){
+    channels.push({id:ref.id, name:name});
+    channels.sort(function(a,b){ return a.name.localeCompare(b.name); });
+    closeM('ch-modal');
+    renderChannels();
+    toast('Bölüm eklendi ✓');
+  }).catch(function(e){ toast('Hata: '+e.message); });
+};
+
+function delChannel(id) {
+  if (!confirm('Sil?')) return;
+  db.collection('channels').doc(id).delete().then(function(){
+    channels=channels.filter(function(c){ return c.id!==id; });
+    renderChannels();
+    toast('Silindi');
+  }).catch(function(e){ toast('Hata: '+e.message); });
 }
 
 // SEARCH
 function doSearch(q) {
-  q = q.trim().toLowerCase();
-  if (!q) { renderVideos(); return; }
-  var res = videos.filter(function(v) {
-    return v.channelId===activeCh && (
-      v.title.toLowerCase().includes(q) ||
-      (v.notes||'').toLowerCase().includes(q) ||
-      (v.tags||[]).some(function(t){ return t.toLowerCase().includes(q); })
+  q=q.trim().toLowerCase();
+  if (!q) { renderNotes(); return; }
+  var res=notes.filter(function(n){
+    return n.channelId===activeCh&&(
+      (n.title||'').toLowerCase().includes(q)||
+      (n.notes||'').toLowerCase().includes(q)||
+      (n.tags||[]).some(function(t){ return t.toLowerCase().includes(q); })
     );
   });
-  renderVideos(res);
+  renderNotes(res);
 }
 
 // SETTINGS
 function openSettings() { buildColors(); openM('s-modal'); }
-function setTheme(t) { document.body.classList.toggle('light', t==='light'); localStorage.setItem('tn-theme',t); }
+function setTheme(t) { document.body.classList.toggle('light',t==='light'); localStorage.setItem('tn-theme',t); }
 function setAccent(c) { document.documentElement.style.setProperty('--accent',c); localStorage.setItem('tn-accent',c); buildColors(); }
 function buildColors() {
-  var cur = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-  document.getElementById('color-row').innerHTML = COLORS.map(function(c) {
+  var cur=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  document.getElementById('color-row').innerHTML=COLORS.map(function(c){
     return '<div class="cdot'+(cur===c?' sel':'')+'" style="background:'+c+'" onclick="setAccent(\''+c+'\')"></div>';
   }).join('');
 }
@@ -629,33 +753,31 @@ function closeLb() { document.getElementById('lb').classList.remove('open'); }
 function openM(id) { document.getElementById(id).classList.add('open'); }
 function closeM(id) {
   document.getElementById(id).classList.remove('open');
-  if (id==='note-modal') { clearTimeout(saveTimer); saveNote(); if(activeCh) renderVideos(); }
+  if (id==='note-modal') { clearTimeout(saveTimer); saveNote(); curNote=null; }
 }
-document.querySelectorAll('.modal-bg').forEach(function(bg) {
-  bg.addEventListener('click', function(e) { if(e.target===bg) closeM(bg.id); });
+document.querySelectorAll('.modal-bg').forEach(function(bg){
+  bg.addEventListener('click', function(e){ if(e.target===bg) closeM(bg.id); });
 });
-document.addEventListener('keydown', function(e) {
-  if (e.key==='Escape') {
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape'){
     document.querySelectorAll('.modal-bg.open').forEach(function(m){ closeM(m.id); });
     closeLb();
   }
 });
 
 // UTILS
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function ytThumb(url) { if(!url) return null; var m=url.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/); return m?'https://img.youtube.com/vi/'+m[1]+'/mqdefault.jpg':null; }
-function fmtDate(ts) { if(!ts) return ''; var d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'}); }
-function toast(msg, dur) {
-  dur = dur||2400;
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function ytThumb(url){ if(!url)return null; var m=url.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/); return m?'https://img.youtube.com/vi/'+m[1]+'/mqdefault.jpg':null; }
+function fmtDate(ts){ if(!ts)return ''; var d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'}); }
+function toast(msg,dur){
+  dur=dur||2400;
   var el=document.getElementById('toast');
   el.textContent=msg; el.classList.add('show');
-  setTimeout(function(){ el.classList.remove('show'); }, dur);
+  setTimeout(function(){ el.classList.remove('show'); },dur);
 }
 
 // BOOT
-window.onload = function() {
-  if (tryAutoInit()) { startApp(); }
-};
+window.onload = function() { if(tryAutoInit()){ startApp(); } };
 </script>
 </body>
 </html>
