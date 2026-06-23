@@ -446,8 +446,8 @@ function renderChannels() {
   var html = '';
   channels.forEach(function(ch) {
     var cnt = notes.filter(function(n){ return n.channelId===ch.id; }).length;
-    html += '<div class="ch-card" onclick="goNotes(\''+ch.id+'\')">' +
-      '<button class="cc-del" onclick="event.stopPropagation();delChannel(\''+ch.id+'\')">✕</button>' +
+    html += '<div class="ch-card" data-chid="'+ch.id+'">' +
+      '<button class="cc-del" data-delid="'+ch.id+'">✕</button>' +
       '<div class="cc-name">'+esc(ch.name)+'</div>' +
       '<div class="cc-cnt">'+cnt+' not</div>' +
     '</div>';
@@ -456,6 +456,13 @@ function renderChannels() {
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
     'Bölüm Ekle</button>';
   document.getElementById('ch-grid').innerHTML = html;
+  // event delegation
+  document.getElementById('ch-grid').onclick = function(e) {
+    var delBtn = e.target.closest('[data-delid]');
+    if (delBtn) { e.stopPropagation(); delChannel(delBtn.dataset.delid); return; }
+    var card = e.target.closest('[data-chid]');
+    if (card) { goNotes(card.dataset.chid); }
+  };
 }
 
 // NOTES
@@ -474,7 +481,7 @@ function renderNotes(list) {
     var thumb = n.type==='yt' ? ytThumb(n.url) : null;
     var imgs = n.images||[];
     var typeColor = TYPE_COLORS[n.type]||'var(--accent)';
-    html += '<div class="n-card type-'+n.type+'" onclick="openNoteDetail(\''+n.id+'\')">';
+    html += '<div class="n-card type-'+n.type+'" data-nid="'+n.id+'">';
     if (thumb) html += '<div class="nc-thumb"><img src="'+thumb+'" loading="lazy"></div>';
     else if (n.type==='image' && imgs.length) html += '<div class="nc-thumb"><img src="'+imgs[0].url+'" loading="lazy"></div>';
     html += '<div class="nc-header">' +
@@ -491,6 +498,10 @@ function renderNotes(list) {
     html += '</div>';
   });
   document.getElementById('n-list').innerHTML = html;
+  document.getElementById('n-list').onclick = function(e) {
+    var card = e.target.closest('[data-nid]');
+    if (card) openNoteDetail(card.dataset.nid);
+  };
 }
 
 // TYPE PICKER
